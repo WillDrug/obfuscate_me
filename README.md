@@ -17,7 +17,13 @@ The requirements for the main obfuscation tool now include:
 
 ## Changelog
 ### v1.1
+Basic streaming proc added.
+Requirements:
+* pynput
 
+*WARNING: Clunky behaviour due to `pynput` package. Key combos might fail.*
+
+Usage: Change EXIT_KEY in the script to the one suited and run before chatting. 
 
 ### v1.0
 win_clipboard_musher.py
