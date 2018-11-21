@@ -8,6 +8,30 @@ General purpose chatting obfuscation for fun.
 ## This is not a code obfuscation tool.
 This is, rather, a thing to change the text you're about to send to something aweful.
 
+## Usage
+Please refer to usage in the changelog for now. Before usage requirements should be installed.
+There is no requirements.txt because it would be an overkill for each one script. All requirements are listed here
+
+The requirements for the main obfuscation tool now include:
+* pymorphy2
+
+## Changelog
+### v1.1
+
+
+### v1.0
+win_clipboard_musher.py
+Basic windows clipboard musher. I use it with AutoHotKey with this (I do have a way of pressing F13, 
+but you can change the key used).
+```lua
+^!n::
+return
+F13::run python obfuscate_me\win_clipboard_musher.py
+```
+Requirements to run mush_clipboard_win_any.py
+* win32clipboard
+
+
 ### Right now it supports:
 * Working with win32 clipboard
 * Working with cyrillic making it look like old cyrillic

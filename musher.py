@@ -1,12 +1,8 @@
 import random
-import win32clipboard
 import re
 import pymorphy2
-# this should be switched up to separate files and such
 
-THRESHOLD = 0.7
-
-
+THRESHOLD = -1
 TRANSLATE = {  # not using utf-8 codes to know which chars already used
     'гь': ['Ꙉ'],
     'жь': ['ʒ'],
@@ -26,21 +22,23 @@ TRANSLATE = {  # not using utf-8 codes to know which chars already used
     'г': ['ȝ', 'ћ'],
     'д': ['ⰼ'],
 }
-
 VOWELS = ['а', 'о', 'и', 'е', 'ё', 'э', 'ы', 'у', 'ю', 'я']
 CONSONANTS = ['б', 'в', 'г', 'д', 'ж', 'з', 'й', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш', 'щ']
 BEFORE_HARD_MARK = ['б', 'в', 'г', 'д', 'ж', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш']
-
 dicts = pymorphy2.analyzer.MorphAnalyzer()
 
 
-def normalize(match):
-    g = match.group()
+def normalize_regex(match):
+    return normalize(match.group())
+
+def normalize(data):
     # normalize by morpher
-    replacement = dicts.parse(g)[0].word
-    if replacement.__len__() == g.__len__():
+    # TODO: normalize by levenstein distance (may be collect most used words) or use an online dictionary service
+    # or google api or something.
+    replacement = dicts.parse(data)[0].word
+    if replacement.__len__() == data.__len__():
         repl = [q for q in replacement]
-        matl = [q for q in g]
+        matl = [q for q in data]
         if repl.__len__() == matl.__len__():
             for i in range(matl.__len__()):
                 if matl[i].islower():
@@ -69,16 +67,14 @@ def normalize(match):
     return replacement
 
 
-def mush(data):
-    test = re.compile("\w+")  #each word
-    data = re.sub(test, normalize, data)
-    # print(data)
-    return data
+def mush(data, single=False):
+    if single:
+        return normalize(data)
+    else:
+        test = re.compile("\w+")  #each word
+        data = re.sub(test, normalize_regex, data)
+        # print(data)
+        return data
 
 # Съешь еще этих, СЪЕШЬ! мягких)) ЕщЕ *французских* :( булок да... да выпей чаю, зелибоба? Гьрь
 
-win32clipboard.OpenClipboard()
-cdata = win32clipboard.GetClipboardData()#.encode('utf-8')
-cdata = mush(cdata)
-win32clipboard.SetClipboardData(win32clipboard.CF_UNICODETEXT, cdata)
-win32clipboard.CloseClipboard()
