@@ -27,11 +27,17 @@ CONSONANTS = ['б', 'в', 'г', 'д', 'ж', 'з', 'й', 'к', 'л', 'м', 'н', 
 BEFORE_HARD_MARK = ['б', 'в', 'г', 'д', 'ж', 'к', 'л', 'м', 'н', 'п', 'р', 'с', 'т', 'ф', 'х', 'ц', 'ч', 'ш']
 dicts = pymorphy2.analyzer.MorphAnalyzer()
 
+def normalize_with_threshold(threshold):
+    def normalize_regex_parmed(matchobj):
+        return normalize(matchobj.group(), threshold=threshold)
+    return normalize_regex_parmed
 
 def normalize_regex(match):
     return normalize(match.group())
 
-def normalize(data):
+def normalize(data, threshold = None):
+    if threshold is None:
+        threshold = THRESHOLD
     # normalize by morpher
     # TODO: normalize by levenstein distance (may be collect most used words) or use an online dictionary service
     # or google api or something.
@@ -48,12 +54,12 @@ def normalize(data):
             replacement = ''.join(repl)
 
     # now how about some hard marks... not everywhere, of course.
-    if replacement[-1] in BEFORE_HARD_MARK and random.random() > THRESHOLD:
+    if replacement[-1] in BEFORE_HARD_MARK and random.random() > threshold:
         replacement = replacement + ('Ҍ' if replacement[-1].isupper() else 'ҍ')
     # now let's choose one substitute for each letter available to change up
     letters = {q: TRANSLATE[q][random.randint(0, TRANSLATE[q].__len__()-1)] for q in TRANSLATE}
     for letter in letters:
-        if random.random() > THRESHOLD:
+        if random.random() > threshold:
             for i in re.finditer(letter, replacement.lower()):
                 found = replacement[i.span()[0]:i.span()[1]]
                 if found.isupper():
@@ -67,14 +73,17 @@ def normalize(data):
     return replacement
 
 
-def mush(data, single=False):
+def mush(data, single=False, threshold=None):
     if single:
-        return normalize(data)
+        return normalize(data, threshold=threshold)
     else:
         test = re.compile("\w+")  #each word
-        data = re.sub(test, normalize_regex, data)
+        if threshold is not None:
+            data = re.sub(test, normalize_with_threshold(threshold), data)
+        else:
+            data = re.sub(test, normalize_regex, data)
         # print(data)
         return data
 
-# Съешь еще этих, СЪЕШЬ! мягких)) ЕщЕ *французских* :( булок да... да выпей чаю, зелибоба? Гьрь
-
+if __name__ == '__main__':
+    print(mush('Съешь еще этих, СЪЕШЬ! мягких)) ЕщЕ *французских* :( булок да... да выпей чаю, зелибоба? Гьрь', threshold=-1))

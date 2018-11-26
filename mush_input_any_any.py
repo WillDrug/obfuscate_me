@@ -10,6 +10,7 @@ MODIFIERS = [Key.shift_l, Key.shift, Key.shift_r, Key.ctrl_l, Key.ctrl, Key.cmd_
 EXIT_KEY = Key.f14
 PAUSE = 2
 
+
 # TODO: Stream in ALT+CODE characters
 # TODO: supress multiple press events for held keys
 
@@ -41,7 +42,8 @@ class StreamMusher:
 
     def run(self):
         while self.keepalive:
-            self.listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release)
+            # Todo: rewrite to use suppress event!
+            self.listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release, suppress=True)
             self.listener.start()
             self.listener.join()
             self.digest()
@@ -59,12 +61,16 @@ class StreamMusher:
                 if char in ['X', 'x'] and self.modifiers[Key.ctrl_l]:  # some bullshittery is afoot
                     self.clear_buffer()
                 return
+        if char in ['.', ',']:
+            self.listener.stop()
+            return
         if self.capture.match(char):
             self.buffer.append(char)
         else:
             if self.buffer.__len__() > 0:  # recording started already so this is a word finished
                 #self.digest()  # changed to stoppign listener first
                 self.listener.stop()
+                return
 
     def digest(self):
         # print(f'digesting {self.buffer}')
