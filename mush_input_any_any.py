@@ -39,6 +39,7 @@ class StreamMusher:
             Key.cmd_l: False,
             Key.cmd_r: False
         }
+        self.breaker = None
 
     def run(self):
         while self.keepalive:
@@ -61,7 +62,7 @@ class StreamMusher:
                 if char in ['X', 'x'] and self.modifiers[Key.ctrl_l]:  # some bullshittery is afoot
                     self.clear_buffer()
                 return
-        if char in ['.', ',']:
+        if char in ['.', ',', ')', '(', '[', ']']:
             self.listener.stop()
             return
         if self.capture.match(char):
@@ -82,6 +83,7 @@ class StreamMusher:
         backtrack = self.buffer.__len__()
         out = ''.join(self.buffer)
         out = mush(out, single=True)
+        # todo: rewrite this to work with supress.
         self.keyboard_controller.press(Key.left)
         for i in range(backtrack):
             self.keyboard_controller.press(Key.backspace)
@@ -106,6 +108,7 @@ class StreamMusher:
             self.ingest(key.char)
         except AttributeError:  # for special keys:
             if key in [Key.space, Key.enter]:
+                self.buffer.append(key)  # do not loose the actual input
                 return False  # digest then restart
             # todo: refactor
             if key == Key.backspace:
