@@ -5,11 +5,12 @@ from pynput import keyboard
 from pynput.keyboard import Key, Controller
 from pynput.keyboard import Listener
 
-MODIFIERS = [Key.shift_l, Key.shift, Key.shift_r, Key.ctrl_l, Key.ctrl, Key.cmd_r, Key.cmd_r, Key.cmd, Key.cmd_l]
 
 EXIT_KEY = Key.f14
 PAUSE = 2
 
+BREAKAGE = [',', '.', ')', '(', ']', '[', '!', '?', Key.space, Key.enter] + [q for q in range(10)]
+UPPER_MOD = [Key.shift_l, Key.shift_r, Key.shift]
 
 # TODO: Stream in ALT+CODE characters
 # TODO: supress multiple press events for held keys
@@ -25,108 +26,106 @@ class StreamMusher:
         # .release('a')
         # .type('dsfsdf')
         self.buffer = list()
+        self.modbuffer = list()
         self.clear_buffer()
         self.capture = re.compile('\w')
-        self.modifiers = {
-            Key.ctrl: False,  # todo: move to CTRL = [Key.ctrl, Key.ctrl_l, etc.] const list
-            Key.alt: False,
-            Key.cmd: False,
-            Key.ctrl_l: False,
-            Key.ctrl_r: False,
-            Key.alt_l: False,
-            Key.alt_r: False,
-            Key.alt_gr: False,
-            Key.cmd_l: False,
-            Key.cmd_r: False
-        }
+        self.upper = {q: False for q in UPPER_MOD}
         self.breaker = None
 
     def run(self):
         while self.keepalive:
             # Todo: rewrite to use suppress event!
-            self.listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release, suppress=True)
+            self.breaker = None
+            self.listener = keyboard.Listener(on_press=self.on_press, on_release=self.on_release)#, suppress=True)
             self.listener.start()
             self.listener.join()
             self.digest()
 
-    def clear_modifiers(self):
-        for k in self.modifiers:
-            self.modifiers[k] = False
-
     def clear_buffer(self):
         self.buffer.clear()
+        self.modbuffer.clear()
 
     def ingest(self, char):
-        for k in self.modifiers:
-            if self.modifiers[k]:
-                if char in ['X', 'x'] and self.modifiers[Key.ctrl_l]:  # some bullshittery is afoot
-                    self.clear_buffer()
-                return
-        if char in ['.', ',', ')', '(', '[', ']']:
+        if char in BREAKAGE:
+            self.breaker = char
             self.listener.stop()
-            return
+            return  # digest and rerun
+
         if self.capture.match(char):
             self.buffer.append(char)
-        else:
+            self.modbuffer.append(any([self.upper[q] for q in self.upper]))
+        else:  # capturing all missed in BREAKAGE, though shouldn't be much
             if self.buffer.__len__() > 0:  # recording started already so this is a word finished
                 #self.digest()  # changed to stoppign listener first
                 self.listener.stop()
                 return
 
     def digest(self):
-        # print(f'digesting {self.buffer}')
+        print(f'digesting {self.buffer} \n with mod {self.modbuffer}')
         if self.buffer.__len__() == 0:
             return
-        for k in self.modifiers:
-            self.keyboard_controller.release(k)
+
         # todo: exception handling
-        backtrack = self.buffer.__len__()
         out = ''.join(self.buffer)
         out = mush(out, single=True)
-        # todo: rewrite this to work with supress.
+
         self.keyboard_controller.press(Key.left)
-        for i in range(backtrack):
+        self.keyboard_controller.release(Key.left)
+        for l in range(self.buffer.__len__()):
             self.keyboard_controller.press(Key.backspace)
             self.keyboard_controller.release(Key.backspace)
-        #self.keyboard_controller.type(''.join(out))
-        for l in out:  # not letting shift bother us
-            [self.keyboard_controller.release(key) for key in MODIFIERS]
-            self.keyboard_controller.press(l)
-            self.keyboard_controller.release(l)
 
+        for m, c in zip(self.modbuffer, out):  # not letting shift bother us
+            if m:
+                self.keyboard_controller.press(Key.shift_l)
+                self.keyboard_controller.press(c)
+                self.keyboard_controller.release(c)
+            else:
+                self.keyboard_controller.release(Key.shift_l)
+                self.keyboard_controller.press(c)
+                self.keyboard_controller.release(c)
+        self.keyboard_controller.release(Key.shift_l)
+
+
+        # if self.breaker is not None:
+        #     self.keyboard_controller.press(self.breaker)
+        #     self.keyboard_controller.release(self.breaker)
         self.keyboard_controller.press(Key.right)
-        #
-        # if self.break_key is not None:
-        #     self.keyboard_controller.press(self.break_key)
-        #     self.keyboard_controller.release(self.break_key)
-        #     self.break_key = None
+        self.keyboard_controller.release(Key.right)
         self.clear_buffer()
 
     def on_press(self, key):
-        # self.break_key = key
-        try:  # if the key is alphanumeric
+        if hasattr(key, 'char'):
             self.ingest(key.char)
-        except AttributeError:  # for special keys:
-            if key in [Key.space, Key.enter]:
-                self.buffer.append(key)  # do not loose the actual input
-                return False  # digest then restart
-            # todo: refactor
-            if key == Key.backspace:
-                try:
-                    self.buffer.pop()
-                except IndexError:
-                    pass  #if we've finished a word we do not return. for now.
-            # not processing shift because inbound alphanumeric contains case.
-            if key == self.exit_key:  #
-                self.keepalive = False
-                # self.digest()
-                return False  # digest and quit
-            if key in self.modifiers.keys():
-                self.modifiers[key] = True
+            return
+        if key in BREAKAGE:
+            self.breaker = key
+            return False  # digest then restart
+
+        if key == Key.backspace:
+            try:
+                self.buffer.pop()
+            except IndexError:
+                pass  #if we've finished a word we do not return. for now.
+            try:
+                self.modbuffer.pop()
+            except IndexError:
+                pass
+            return
+
+        # not processing shift because inbound alphanumeric contains case.
+        if key == self.exit_key:  #
+            self.keepalive = False
+            return False  # digest and quit
+
+        if key in self.upper.keys():
+            self.upper[key] = True
+
+        return
 
     def on_release(self, key):
-        if key in self.modifiers.keys():
-            self.modifiers[key] = False
+        if key in self.upper.keys():
+            self.upper[key] = False
 
 
 if __name__ == '__main__':
