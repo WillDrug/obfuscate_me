@@ -2,7 +2,7 @@ import random
 import re
 import pymorphy2
 
-THRESHOLD = 0.7
+THRESHOLD = 0.5
 TRANSLATE = {  # not using utf-8 codes to know which chars already used
     'гь': ['Ꙉ'],
     'жь': ['ʒ'],
