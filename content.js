@@ -263,7 +263,13 @@ var keyListener = function (e) {
         if (options.detectType == 'bytag') {
             elem.innerText=elem.innerText.replace(options.triggerButton, '');
         }
-        elem.innerText = mush(elem.innerText);
+        if (elem.innerText == undefined || elem.innerText == '') {
+            if ('value' in elem) {
+                elem.value = mush(elem.value);
+            }
+        } else {
+            elem.innerText = mush(elem.innerText);
+        }
     }
 }
 
