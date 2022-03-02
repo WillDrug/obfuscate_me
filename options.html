@@ -32,15 +32,25 @@
 						<option value="loud">Pretty</option>
 					</select>
 				</div>
+                <div class="form-group">
+                    <label for="detectType">Trigger type</label>
+                    <select id="detectType" class="form-control">
+                        <option value="bybutton">Button press</option>
+                        <option value="bytag">Trigger tag</option>
+                    </select>
+                </div>
 				<div class="form-group">
 
 					<label for="trigger">
-						Trigger button name
+						Trigger button or tag
 					</label>
 					<input type="text" class="form-control" id="trigger">
+                    <p class="help-block">
+                        For "Button press": Name of the button to listen to;
+                        For "Trigger tag": Text to trigger the change (like &#60;c&#62;)
+                    </p>
 				</div>
 				<div class="form-group">
-
 					<label for="threshold">
 						Threshold
 					</label>

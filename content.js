@@ -212,14 +212,29 @@ var pretty_mush = {
     'G': ['Ԍ', 'ԍ', 'ɢ'],
 }
 
-var mush = function (e, threshold) {
-    threshold = Number(threshold);
-    var mushType;
-    chrome.storage.sync.get({
-        mushType: 'quiet',
+const options = {};
+
+chrome.storage.sync.get({
+        triggerButton: 'F20',
+        threshold: 0.4,
+        detectType: 'bybutton',
+        mushType: 'quiet'
     }, function(items) {
-        mushType = items.mushType;
-    })
+        for (key in items) {
+            options[key] = items[key];
+        }
+    });
+
+chrome.storage.onChanged.addListener(function(changes, namespace) {
+    for (key in changes) {
+        options[key] = changes[key]['newValue'];
+    }
+});
+
+var mush = function (e) {
+    var threshold = Number(options.threshold);
+    var mushType = options.mushType;
+
     var mushdata;
     if (mushType == 'quiet') {
         mushdata = quiet_mush;
@@ -243,18 +258,13 @@ var mush = function (e, threshold) {
 }
 
 var keyListener = function (e) {
-    chrome.storage.sync.get({
-        triggerButton: 'F20',
-        threshold: 0.4
-    }, function(items) {
-        var triggerButton = items.triggerButton;
-        var threshold = items.threshold;
-        if (e.key == triggerButton) {
-            elem = document.activeElement;
-            elem.innerText = mush(elem.innerText, threshold);
+    var elem = document.activeElement;
+    if ((options.detectType == 'bybutton' && e.key == options.triggerButton) || (options.detectType == 'bytag' && elem.innerText.includes(options.triggerButton))) {
+        if (options.detectType == 'bytag') {
+            elem.innerText=elem.innerText.replace(options.triggerButton, '');
         }
-    })
-
-};
+        elem.innerText = mush(elem.innerText);
+    }
+}
 
 addEventListener("keyup", keyListener);

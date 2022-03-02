@@ -5,10 +5,12 @@ function save_options() {
   var mushtype = document.getElementById('mushtype').value;
   var trigger = document.getElementById('trigger').value;
   var threshold = document.getElementById('threshold').value;
+  var detectType = document.getElementById('detectType').value;
   chrome.storage.sync.set({
     mushType: mushtype,
     triggerButton: trigger,
-    threshold: threshold
+    threshold: threshold,
+    detectType: detectType
   }, function() {
     // Update status to let user know options were saved.
     var status = document.getElementById('status');
@@ -25,11 +27,13 @@ function restore_options() {
     chrome.storage.sync.get({
         mushType: 'loud',
         triggerButton: 'F20',
-        threshold: 0.4
+        threshold: 0.4,
+        detectType: 'bybutton'
     }, function(items) {
         document.getElementById('mushtype').value = items.mushType;
         document.getElementById('trigger').value = items.triggerButton;
         document.getElementById('threshold').value = items.threshold;
+        document.getElementById('detectType').value = items.detectType;
     })
 }
 
@@ -37,4 +41,5 @@ document.addEventListener('DOMContentLoaded', restore_options);
 document.getElementById('mushtype').addEventListener('change', save_options);
 document.getElementById('trigger').addEventListener('change', save_options);
 document.getElementById('threshold').addEventListener('change', save_options);
+document.getElementById('detectType').addEventListener('change', save_options);
 document.getElementById('save').addEventListener('click', save_options);
