@@ -1,6 +1,105 @@
 var elements = document.getElementsByTagName('span');
 
-var mushdata = {
+var quiet_mush = {
+    ' ': ['·'],
+    'с': ['ϲ', 'င'],
+    'е': ['e', 'e'],
+    'ш': ['Ⱎ'],
+    'ё': ['ë'],
+    'т': ['ፐ'],
+    'и': ['ͷ'],
+    'х': ['χ'],
+    'м': ['ӎ', 'μ'],
+    'я': ['ѣ'],
+    'г': ['γ', 'r'],
+    'к': ['κ','ϰ','κ'],
+    'ф': ['Ⱇ', 'ϕ', 'φ'],
+    'р': ['ρ'],
+    'а': ['a', 'α', 'ɑ'],
+    'у': ['y', 'ყ'],
+    'з': ['з'],
+    'б': ['ϭ'],
+    'л': ['ʌ'],
+    'о': ['ဝ', 'ဝ'],
+    'в': ['ʙ'],
+    'ы': ['ꙑ'],
+    'п': ['π'],
+    'ч': ['ɥ'],
+    'С': ['C', 'Ϲ', 'Ⅽ'],
+    'Ъ': ['Ҍ'],
+    'Е': ['Ε'],
+    'Ш': ['Ɯ'],
+    'Т': ['Τ', 'T'],
+    'И': ['Ͷ'],
+    'Х': ['Χ'],
+    'М': ['Μ'],
+    'Г': ['Γ'],
+    'К': ['Κ', 'Κ'],
+    'Ф': ['Φ'],
+    'Р': ['Ρ'],
+    'А': ['Α', 'A'],
+    'Н': ['ᚺ'],
+    'У': ['Y'],
+    'З': ['Ვ'],
+    'Б': ['Ϭ'],
+    'Л': ['Λ'],
+    'О': ['O', 'ഠ', 'ഠ'],
+    'В': ['B'],
+    'Ы': ['Ꙑ'],
+    'П': ['Π'],
+    'Й': [''],
+    'Ч': ['Ɥ'],
+    'a': ['a', 'ɑ'],
+    'q': ['ԛ'],
+    'u': ['Ս', 'ս'],
+    'i': ['ɪ'],
+    'c': ['с', 'ϲ', 'င'],
+    'k': ['κ','κ'],
+    'r': ['г'],
+    'o': ['o', 'ဝ', 'ဝ'],
+    'w': ['ԝ'],
+    'n': ['ո', ],
+    'f': ['ϝ'],
+    'x': ['χ'],
+    'j': ['յ'],
+    'm': ['ᛖ'],
+    'p': ['ρ'],
+    's':  ['ѕ', 'Տ', 'Ჽ'],
+    'v': ['∨', '⋎'],
+    'h': ['հ'],
+    'l': ['ι'],
+    'z': ['ⴭ'],
+    'y': ['ყ'],
+    'd': ['ԁ'],
+    'g': ['ց', 'g'],
+    'A': ['Α'],
+    'Q': ['Ǫ'],
+    'U': ['Ս'],
+    'I': ['Ɪ'],
+    'C': ['С', 'Ϲ', 'Ⅽ'],
+    'K': ['Κ', 'Κ'],
+    'B': ['Β'],
+    'O': ['ഠ', 'Ჿ'],
+    'W': ['Ԝ'],
+    'N': ['Ν'],
+    'F': ['Ϝ'],
+    'X': ['Χ'],
+    'J': ['Ј', 'Ϳ'],
+    'M': ['Ϻ'],
+    'P': ['Р', 'Ρ'],
+    'S': ['Ѕ', 'Ꚃ', 'ട', 'ჽ'],
+    'V': ['Ⅴ'],
+    'E': ['Ε'],
+    'T': ['Τ'],
+    'H': ['Η', 'Н'],
+    'L': ['Ⅼ', 'Լ'],
+    'Z': ['Ζ'],
+    'Y': ['У'],
+    'D': ['Ⅾ'],
+    'G': ['Ԍ'],
+}
+
+var pretty_mush = {
     ' ': ['·'],
     'с': ['c', 'ć', 'ϲ', 'င'],
     'ъ': ['ҍ'],
@@ -114,12 +213,24 @@ var mushdata = {
     'G': ['Ԍ', 'ԍ', 'ɢ'],
 }
 
-var THRESHOLD = 0.2;
+var mush = function (e, threshold) {
+    threshold = Number(threshold);
+    var mushType;
+    chrome.storage.sync.get({
+        mushType: 'quiet',
+    }, function(items) {
+        mushType = items.mushType;
+    })
+    var mushdata;
+    if (mushType == 'quiet') {
+        mushdata = quiet_mush;
+    } else {
+        mushdata = pretty_mush;
+    }
 
-var mush = function (e) {
     var ret = '';
     for (var i = 0; i < e.length; i++) {
-        if (Math.random() < THRESHOLD) {
+        if (Math.random() < threshold) {
             if (e[i] in mushdata) {
                 ret += mushdata[e[i]][Math.floor(Math.random()*mushdata[e[i]].length)]
             } else {
@@ -132,11 +243,18 @@ var mush = function (e) {
     return ret
 }
 
-var F20Listener = function (e) {
-    if (e.key == 'F20') {
+var keyListener = function (e) {
+    chrome.storage.sync.get({
+        triggerButton: 'F20',
+        threshold: 0.4
+    }, function(items) {
+        triggerButton = items.triggerButton;
+        threshold = items.threshold;
+    })
+    if (e.key == triggerButton) {
         elem = document.activeElement;
-        elem.innerText = mush(elem.innerText);
+        elem.innerText = mush(elem.innerText, threshold);
     }
 };
 
-addEventListener("keyup", F20Listener);
+addEventListener("keyup", keyListener);

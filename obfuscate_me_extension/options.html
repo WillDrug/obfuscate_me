@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>My Test Extension Options</title></head>
+<body>
+
+<div>
+    <label for="mushtype">Type of mushing: </label>
+    <select id="mushtype">
+        <option value="quiet">Quiet</option>
+        <option value="loud">Pretty</option>
+    </select>
+</div>
+<div>
+    <label for="mushtype">Trigger button</label>
+    <input type="text" id="trigger" value="F20">
+</div>
+<div>
+    <label for="threshold">Threshold</label>
+    <input type="number" id="threshold" value="0.4">
+</div>
+
+<div>
+    <input type="button" id="save" value="Save"/>
+    <span id="status"></span>
+</div>
+
+<script src="options.js"></script>
+</body>
+</html>
