@@ -259,6 +259,9 @@ var mush = function (e) {
 
 var keyListener = function (e) {
     var elem = document.activeElement;
+    while (elem.children.length > 0 && elem.children[0].tagName != 'BR') {
+        elem = elem.children[0];
+    }
     if ((options.detectType == 'bybutton' && e.key == options.triggerButton) || (options.detectType == 'bytag' && elem.innerText.includes(options.triggerButton))) {
         if (options.detectType == 'bytag') {
             elem.innerText=elem.innerText.replace(options.triggerButton, '');
