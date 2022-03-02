@@ -1,29 +1,80 @@
 <!DOCTYPE html>
-<html>
-<head><title>My Test Extension Options</title></head>
-<body>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<div>
-    <label for="mushtype">Type of mushing: </label>
-    <select id="mushtype">
-        <option value="quiet">Quiet</option>
-        <option value="loud">Pretty</option>
-    </select>
-</div>
-<div>
-    <label for="mushtype">Trigger button</label>
-    <input type="text" id="trigger" value="F20">
-</div>
-<div>
-    <label for="threshold">Threshold</label>
-    <input type="number" id="threshold" value="0.4">
+    <title>Obfuscator</title>
+
+    <meta name="description" content="Obfuscator Config">
+    <meta name="author" content="WillDrug">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+
+  </head>
+  <body>
+
+    <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-2">
+		</div>
+		<div class="col-md-8">
+			<form role="form">
+				<div class="form-group">
+
+					<label for="mushtype">
+						Mush type
+					</label>
+					<select id="mushtype" class="form-control">
+						<option value="quiet">Quiet</option>
+						<option value="loud">Pretty</option>
+					</select>
+				</div>
+				<div class="form-group">
+
+					<label for="trigger">
+						Trigger button name
+					</label>
+					<input type="text" class="form-control" id="trigger">
+				</div>
+				<div class="form-group">
+
+					<label for="threshold">
+						Threshold
+					</label>
+					<input type="number" class="form-control" id="threshold" step="0.1">
+					<p class="help-block">
+						Percentage of chance to change each letter, [0-1] (0-100%)
+					</p>
+				</div>
+			</form>
+		</div>
+		<div class="col-md-2">
+		</div>
+	</div>
+	<div class="row">
+        <div class="col-md-2">
+
+        </div>
+		<div class="col-md-6">
+            <p class="help-block" id="status"></p>
+		</div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-md btn-primary" id="save">
+				Save
+			</button>
+        </div>
+        <div class="col-md-2">
+
+        </div>
+	</div>
 </div>
 
-<div>
-    <input type="button" id="save" value="Save"/>
-    <span id="status"></span>
-</div>
-
-<script src="options.js"></script>
-</body>
+    <script src="js/jquery.min.js"></script>
+    <!-- <script src="js/bootstrap.min.js"></script> --!>
+    <script src="js/scripts.js"></script>
+  <script src="options.js"></script>
+  </body>
 </html>

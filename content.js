@@ -1,7 +1,6 @@
 var elements = document.getElementsByTagName('span');
 
 var quiet_mush = {
-    ' ': ['·'],
     'с': ['ϲ', 'င'],
     'е': ['e', 'e'],
     'ш': ['Ⱎ'],
@@ -248,13 +247,14 @@ var keyListener = function (e) {
         triggerButton: 'F20',
         threshold: 0.4
     }, function(items) {
-        triggerButton = items.triggerButton;
-        threshold = items.threshold;
+        var triggerButton = items.triggerButton;
+        var threshold = items.threshold;
+        if (e.key == triggerButton) {
+            elem = document.activeElement;
+            elem.innerText = mush(elem.innerText, threshold);
+        }
     })
-    if (e.key == triggerButton) {
-        elem = document.activeElement;
-        elem.innerText = mush(elem.innerText, threshold);
-    }
+
 };
 
 addEventListener("keyup", keyListener);

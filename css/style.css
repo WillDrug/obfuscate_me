@@ -1,0 +1,11 @@
+
+@media (max-width: 400px) {
+    body {
+        min-width:400px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+    .btn {
+        float: right;
+    }
+}
